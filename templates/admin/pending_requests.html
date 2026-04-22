@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Pending Faculty Requests</h2>
+
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Action</th>
+    </tr>
+
+    {% for f in faculty %}
+    <tr>
+        <td>{{ f.full_name }}</td>
+        <td>{{ f.email }}</td>
+        <td>
+            <a href="/approve_faculty/{{ f.id }}" class="btn btn-success">Approve</a>
+            <a href="/reject_faculty/{{ f.id }}" class="btn btn-danger">Reject</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<h2>Pending Invigilator Requests</h2>
+
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Action</th>
+    </tr>
+
+    {% for i in invigilator %}
+    <tr>
+        <td>{{ i.full_name }}</td>
+        <td>{{ i.email }}</td>
+        <td>
+            <a href="/approve_invigilator/{{ i.id }}" class="btn btn-approve">Approve</a>
+
+            <a href="/reject_invigilator/{{ i.id }}" class="btn btn-reject">Reject</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

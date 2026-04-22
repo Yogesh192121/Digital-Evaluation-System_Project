@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Assign Faculty</h2>
+
+<form method="POST">
+
+    <label>Select Faculty:</label><br><br>
+
+    <select name="faculty" required>
+
+        {% for f in faculty %}
+        <option value="{{ f['id'] }}">
+            {{ f['username'] }}
+        </option>
+        {% endfor %}
+
+    </select>
+
+    <br><br>
+
+    <button type="submit">Assign</button>
+
+</form>
+
+<br>
+
+<a href="/admin_dashboard">Back</a>
+
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Admin Dashboard</h2>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap">
+
+    <a href="/view_students" style="text-decoration:none;color:black">
+        <div class="dashboard-card">
+            <h3>Total Students</h3>
+            <h2>{{total_students}}</h2>
+        </div>
+    </a>
+
+    <a href="/manage_courses" style="text-decoration:none;color:black">
+        <div class="dashboard-card">
+            <h3>Total Courses</h3>
+            <h2>{{total_courses}}</h2>
+        </div>
+    </a>
+
+    <a href="/view_exams" style="text-decoration:none;color:black">
+        <div class="dashboard-card">
+            <h3>Total Exams</h3>
+            <h2>{{total_exams}}</h2>
+        </div>
+    </a>
+
+
+</div>
+
+<br><br>
+
+<!-- 🔥 NEW: EXAM ASSIGNMENTS TABLE -->
+<h3>Exam Management</h3>
+
+<table class="table table-bordered text-center">
+
+    <thead class="table-dark">
+        <tr>
+            <th>Dept</th>
+            <th>Year</th>
+            <th>Course</th>
+            <th>Exam</th>
+            <th>Status</th>
+            <th>Faculty</th>
+            <th>Invigilator</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for exam in assignments %}
+
+        <tr>
+            <td>{{ exam.department }}</td>
+            <td>{{ exam.year }}</td>
+            <td>{{ exam.course_name }}</td>
+            <td>{{ exam.exam_name }}</td>
+
+            <!-- ✅ STATUS (SMART LOGIC) -->
+            <td>
+                {% if exam.faculty_name and exam.invigilator_name %}
+                <span style="color:green; font-weight:bold;">Fully Assigned</span>
+                {% elif exam.faculty_name %}
+                <span style="color:orange;">Faculty Assigned</span>
+                {% else %}
+                <span style="color:red;">Not Assigned</span>
+                {% endif %}
+            </td>
+
+            <!-- ✅ FACULTY NAME -->
+            <td>
+                {% if exam.faculty_name %}
+                <span style="color:green;">{{ exam.faculty_name }}</span>
+                {% else %}
+                <span style="color:red;">Not Assigned</span>
+                {% endif %}
+            </td>
+
+            <!-- ✅ INVIGILATOR NAME -->
+            <td>
+                {% if exam.invigilator_name %}
+                <span style="color:green;">{{ exam.invigilator_name }}</span>
+                {% else %}
+                <span style="color:red;">Not Assigned</span>
+                {% endif %}
+            </td>
+
+            <!-- ✅ ACTIONS -->
+            <td>
+
+                <a href="/assign_faculty/{{ exam.id }}" class="btn btn-primary btn-sm">
+                    Faculty
+                </a>
+
+                <a href="/assign_invigilator/{{ exam.id }}" class="btn btn-warning btn-sm">
+                    Invigilator
+                </a>
+
+                <a href="/delete_exam/{{ exam.id }}" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Are you sure?')">
+                    Delete
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<h3>Recent Activity</h3>
+
+<table class="table">
+    <tr>
+        <th>User</th>
+        <th>Action</th>
+        <th>Details</th>
+        <th>Time</th>
+    </tr>
+
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.username }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.details }}</td>
+        <td>{{ log.timestamp }}</td>
+    </tr>
+    <td style="color:green;">{{ log.action }}</td>
+
+    {% endfor %}
+</table>
+
+
+
+
+{% endblock %}

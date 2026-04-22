@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Student Answer Sheets</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+        <th>Course</th>
+        <th>Exam</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for a in answers %}
+
+    <tr>
+        <td>{{ a.roll_no }}</td>
+        <td>{{ a.student_name }}</td>
+        <td>{{ a.course_name }}</td>
+        <td>{{ a.exam_name }}</td>
+
+        <td>
+            {% if a.total %}
+            <span style="color:green;">Evaluated ({{ a.total }})</span>
+            {% else %}
+            <span style="color:red;">Pending</span>
+            {% endif %}
+        </td>
+
+        <td>
+            <a href="/evaluate/{{ a.id }}">Evaluate</a>
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br>
+
+<a href="/faculty_tasks">⬅ Back to Tasks</a>
+
+{% endblock %}

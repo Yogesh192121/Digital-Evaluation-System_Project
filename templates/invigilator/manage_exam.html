@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Manage Exam</h2>
+
+<a href="/upload_question?assignment_id={{ id }}">Upload Question Paper</a><br><br>
+
+<a href="/upload_model_answer?assignment_id={{ id }}">Upload Model Answer</a><br><br>
+
+<a href="/upload_answer?assignment_id={{ id }}">Upload Student Answers</a>
+
+<br></br>
+
+<a href="/invigilator_exams">⬅ Back</a>
+
+
+
+{% endblock %}

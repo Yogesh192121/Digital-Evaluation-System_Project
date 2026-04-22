@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Assigned Exams</h2>
+
+<table border="1" cellpadding="10" style="width:100%">
+
+    <tr>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Course</th>
+        <th>Exam</th>
+        <th>Action</th>
+    </tr>
+
+    {% for t in tasks %}
+    <tr>
+
+        <td>{{ t.department }}</td>
+        <td>{{ t.year }}</td>
+        <td>{{ t.course_name }}</td>
+        <td>{{ t.exam_name }}</td>
+
+        <td>
+            <a href="/view_student_answers?assignment_id={{ t.id }}">
+                Go to uploaded Answer Sheets
+            </a>
+        </td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}

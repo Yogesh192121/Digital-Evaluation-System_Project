@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Exam Templates</h2>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>Exam Name</th>
+    </tr>
+
+    {% for e in exams %}
+
+    <tr>
+        <td>{{e['id']}}</td>
+        <td>{{e['exam_name']}}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br>
+
+<a href="/admin_dashboard">Back</a>
+{% endblock %}

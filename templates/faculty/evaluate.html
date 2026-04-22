@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .toolsPanel {
+        margin-top: 20px;
+        padding: 15px;
+        background: #eee;
+        text-align: center;
+    }
+
+    .toolBtn.active {
+        outline: 3px solid black;
+    }
+
+    .container {
+        display: flex;
+        gap: 10px;
+    }
+
+    .panel {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* LEFT */
+    .marks {
+        width: 20%;
+        max-height: 650px;
+        overflow: auto;
+    }
+
+    /* CENTER */
+    .answer {
+        width: 40%;
+        position: relative;
+    }
+
+    .answer iframe {
+        width: 100%;
+        height: 650px;
+        border: none;
+    }
+
+    #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        pointer-events: none;
+        /* 🔥 IMPORTANT FIX */
+    }
+
+    /* RIGHT */
+    .qp {
+        width: 40%;
+    }
+
+    .qp iframe {
+        width: 100%;
+        height: 650px;
+        border: none;
+    }
+
+    input {
+        width: 60px;
+        margin: 3px;
+    }
+
+    button {
+        margin: 3px;
+        padding: 6px 10px;
+    }
+
+    .active {
+        border: 2px solid black;
+    }
+</style>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="panel marks">
+
+        <form method="POST" onsubmit="syncTotal()">
+
+            <h4>Q1 (Best 5 × 2)</h4>
+            {% for q in ['a','b','c','d','e','f'] %}
+            <input type="number" class="q1" name="q1{{q}}" max="2" step="0.5"
+                value="{{ existing['q1'+q] if existing else '' }}" oninput="validateMark(this,'q1')">
+            {% endfor %}
+
+            <h4>Q2 (Best 2 × 4)</h4>
+            {% for q in ['a','b','c'] %}
+            <input type="number" class="q2" name="q2{{q}}" max="4" step="0.5"
+                value="{{ existing['q2'+q] if existing else '' }}" oninput="validateMark(this,'q2')">
+            {% endfor %}
+
+            <h4>Q3 (Best 2 × 6)</h4>
+            {% for q in ['a','b','c'] %}
+            <input type="number" class="q3" name="q3{{q}}" max="6" step="0.5"
+                value="{{ existing['q3'+q] if existing else '' }}" oninput="validateMark(this,'q3')">
+            {% endfor %}
+
+            <hr>
+
+            <b>Total: <span id="total">0</span></b>
+            <input type="hidden" name="total" id="totalInput">
+
+            <br><br>
+            <textarea name="comments" placeholder="Comments">{{ existing.comments if existing else '' }}</textarea>
+
+            <br><br>
+            <button type="submit">💾 Save</button>
+
+        </form>
+
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div class="panel answer">
+
+        <h4>{{ data.student_name }}</h4>
+
+        <iframe src="/{{ data.file_path }}"></iframe>
+
+        <div id="overlay"></div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel qp">
+
+        <button onclick="loadQP()">Question Paper</button>
+        <button onclick="loadMA()">Model Answer</button>
+
+        <iframe id="viewer"></iframe>
+
+    </div>
+
+</div>
+<div class="toolsPanel">
+
+    <h3>Evaluation Tools</h3>
+
+    <button class="toolBtn" onclick="selectTool('✔', this)">✔ Correct</button>
+    <button class="toolBtn" onclick="selectTool('✖', this)">✖ Wrong</button>
+    <button class="toolBtn" onclick="selectTool('🔁', this)">🔁 Repeat</button>
+
+    <button onclick="clearTool()">❌ Exit Marking</button>
+    <button onclick="undo()">↩ Undo</button>
+
+</div>
+
+<script>
+
+    /* ---------- LOAD FILES ---------- */
+
+    function loadQP() {
+        const qp = "{{ question_paper if question_paper else '' }}";
+
+        if (qp && qp !== "None") {
+            document.getElementById("viewer").src = "/uploads/" + qp;
+        } else {
+            alert("No Question Paper Uploaded");
+        }
+    }
+
+    function loadMA() {
+        const ma = "{{ model_answer if model_answer else '' }}";
+
+        if (ma && ma !== "None") {
+            document.getElementById("viewer").src = "/uploads/" + ma;
+        } else {
+            alert("No Model Answer Uploaded");
+        }
+    }
+
+
+    /* ---------- VALIDATION ---------- */
+
+    function validateMark(input, type) {
+        let val = parseFloat(input.value)
+        if (isNaN(val)) return
+
+        let allowed = []
+        if (type == "q1") allowed = [0, 0.5, 1, 1.5, 2]
+        if (type == "q2") allowed = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
+        if (type == "q3") allowed = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]
+
+        if (!allowed.includes(val)) {
+            alert("Invalid marks")
+            input.value = ""
+        }
+
+        calculateTotal()
+    }
+
+
+    /* ---------- BEST OF LOGIC ---------- */
+
+    function getBest(className, count) {
+        let inputs = document.querySelectorAll("." + className)
+        let arr = []
+
+        inputs.forEach(i => {
+            let v = parseFloat(i.value)
+            if (!isNaN(v)) arr.push(v)
+        })
+
+        arr.sort((a, b) => b - a)
+        return arr.slice(0, count).reduce((a, b) => a + b, 0)
+    }
+
+    function calculateTotal() {
+        let t = getBest("q1", 5) + getBest("q2", 2) + getBest("q3", 2)
+        document.getElementById("total").innerText = t
+    }
+
+    function syncTotal() {
+        document.getElementById("totalInput").value =
+            document.getElementById("total").innerText
+    }
+
+
+    /* ---------- OVERLAY / MARKING SYSTEM ---------- */
+
+    let selectedTool = null;
+    let history = [];
+
+    /* ---------- TOOL SELECT ---------- */
+
+    function selectTool(tool, btn) {
+
+        const overlay = document.getElementById("overlay");
+
+        // 🔥 If same tool clicked → deselect
+        if (selectedTool === tool) {
+            clearTool();
+            return;
+        }
+
+        // 🔥 Always reset first (IMPORTANT FIX)
+        clearTool();
+
+        // Activate new tool
+        selectedTool = tool;
+        overlay.style.pointerEvents = "auto";
+
+        btn.classList.add("active");
+    }
+
+
+    /* ---------- CLEAR TOOL ---------- */
+
+    function clearTool() {
+
+        selectedTool = null;
+
+        const overlay = document.getElementById("overlay");
+        overlay.style.pointerEvents = "none";
+
+        // remove all highlights
+        document.querySelectorAll(".toolBtn").forEach(b => {
+            b.classList.remove("active");
+        });
+    }
+
+
+    /* ---------- OVERLAY CLICK ---------- */
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const overlay = document.getElementById("overlay");
+
+        overlay.style.pointerEvents = "none";
+
+        overlay.addEventListener("click", function (e) {
+
+            if (!selectedTool) return;
+
+            let mark = document.createElement("div");
+
+            mark.innerText = selectedTool;
+            mark.style.position = "absolute";
+            mark.style.left = e.offsetX + "px";
+            mark.style.top = e.offsetY + "px";
+            mark.style.fontSize = "20px";
+            mark.style.fontWeight = "bold";
+
+            overlay.appendChild(mark);
+            history.push(mark);
+        });
+
+    });
+
+
+    /* ---------- UNDO ---------- */
+
+    function undo() {
+        let last = history.pop();
+        if (last) last.remove();
+    }
+
+
+    /* ---------- INIT ---------- */
+
+    calculateTotal()
+
+</script>
+<script>
+    window.onload = loadQP;
+</script>
+
+<a href="/view_student_answers/{{ assignment_id}}">Back</a>
+
+{% endblock %}

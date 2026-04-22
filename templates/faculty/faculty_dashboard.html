@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Faculty Dashboard</h2>
+<form method="GET">
+
+    <label>Select Exam:</label>
+
+    <select name="assignment_id">
+
+        <option value="">All</option>
+
+        {% for exam in assignments %}
+        <option value="{{ exam.id }}" {% if assignment_id==exam.id|string %} selected {% endif %}>
+            {{ exam.course_name }} - {{ exam.exam_name }} (Year {{ exam.year }})
+        </option>
+        {% endfor %}
+
+    </select>
+
+    <button type="submit">Filter</button>
+
+</form>
+
+<br>
+
+{% if assignment_id %}
+<h3>Showing data for selected exam</h3>
+{% else %}
+<h3>Showing overall data</h3>
+{% endif %}
+
+</select>
+
+</form>
+
+<br>
+
+<div class="dashboard-container">
+
+    <div class="dashboard-card total-card">
+        <div class="card-icon">📄</div>
+        <h3>Total Answer Sheets</h3>
+        <h2>{{ total }}</h2>
+    </div>
+
+
+    <div class="dashboard-card evaluated-card">
+        <div class="card-icon">✅</div>
+        <h3>Evaluated</h3>
+        <h2>{{ evaluated }}</h2>
+    </div>
+
+    <div class="dashboard-card pending-card">
+        <div class="card-icon">⏳</div>
+        <h3>Pending</h3>
+        <h2>{{ pending }}</h2>
+    </div>
+    <br>
+
+    {% endblock %}

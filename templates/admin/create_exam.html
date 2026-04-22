@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Create Exam</h2>
+
+<form method="POST">
+
+    <select name="department">
+        {% for d in departments %}
+        <option value="{{ d.department }}">{{ d.department }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="year">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+    </select>
+
+    <select name="course">
+        {% for c in courses %}
+        <option value="{{ c['id'] }}">{{ c['course_name'] }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="exam">
+        {% for e in exams %}
+        <option value="{{ e['id'] }}">{{ e['exam_name'] }}</option>
+        {% endfor %}
+    </select>
+
+    <button>Create</button>
+
+
+</form>
+
+{% endblock %}

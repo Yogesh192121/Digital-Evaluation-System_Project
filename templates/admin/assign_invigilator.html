@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Assign Invigilator</h2>
+
+    <div class="card shadow p-4 mt-3">
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <label class="form-label">Select Invigilator</label>
+
+                <select name="invigilator_id" class="form-select" required>
+                    <option value="">-- Select Invigilator --</option>
+
+                    {% for inv in invigilators %}
+                    <option value="{{ inv.id }}">
+                        {{ inv.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-warning">
+                Assign Invigilator
+            </button>
+
+            <a href="/admin_dashboard" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

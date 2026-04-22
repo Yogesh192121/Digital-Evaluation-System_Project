@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .dashboard-title {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    /* KPI CARDS */
+    .kpi-card {
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-blue {
+        background: #3498db;
+    }
+
+    .kpi-green {
+        background: #2ecc71;
+    }
+
+    .kpi-orange {
+        background: #f39c12;
+    }
+
+    .kpi-red {
+        background: #e74c3c;
+    }
+
+    /* CHART CARD */
+    .chart-card {
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    /* LIST */
+    .top-list li a {
+        text-decoration: none;
+        color: #2c3e50;
+    }
+
+    .top-list li a:hover {
+        color: #3498db;
+    }
+
+    /* BUTTON GROUP */
+    .btn-group-custom button {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="container my-4">
+
+    <h2 class="dashboard-title">📊 Result Analytics Dashboard</h2>
+
+    <!-- FILTER -->
+    <div class="row mb-4 align-items-center">
+
+        <div class="col-md-4">
+            <select id="assignmentSelect" class="form-select">
+                <option value="">Select Exam</option>
+                {% for a in assignments %}
+                <option value="{{ a.id }}">
+                    {{ a.course_name }} - {{ a.exam_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-8 text-end btn-group-custom">
+            <button class="btn btn-primary" onclick="loadData()">Load</button>
+            <button class="btn btn-success" onclick="exportPDF()">PDF</button>
+            <button class="btn btn-warning" onclick="exportExcel()">Excel</button>
+        </div>
+
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="kpi-card kpi-blue">
+                <h6>Total Papers</h6>
+                <h3 id="kpiTotal">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="kpi-card kpi-green">
+                <h6>Average Marks</h6>
+                <h3 id="kpiAvg">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="kpi-card kpi-orange">
+                <h6>Top Score</h6>
+                <h3 id="kpiTop">-</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="kpi-card kpi-red">
+                <h6>Pass %</h6>
+                <h3 id="kpiPass">0%</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="chart-card p-3">
+                <h6 class="text-center">Checked vs Unchecked</h6>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="chart-card p-3">
+                <h6 class="text-center">Marks Distribution (Out of 30)</h6>
+                <canvas id="marksChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="chart-card p-3">
+                <h6 class="text-center">Pass / Fail</h6>
+                <canvas id="passChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOP STUDENTS -->
+    <div class="row mt-4">
+
+        <div class="col-md-6">
+            <div class="chart-card p-3">
+                <h5>🏆 Top 5 Students</h5>
+                <ul id="topList" class="top-list"></ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-card p-3">
+                <h5>📉 Least Scorer</h5>
+                <p id="leastBox"></p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let statusChart, marksChart, passChart;
+
+    function loadData() {
+
+        let id = document.getElementById("assignmentSelect").value;
+
+        if (!id) {
+            alert("Select exam");
+            return;
+        }
+
+        // ================= NUMERICAL =================
+        fetch(`/numerical_report/${id}`)
+            .then(r => r.json())
+            .then(d => {
+
+                document.getElementById("kpiTotal").innerText = d.total;
+                document.getElementById("kpiAvg").innerText = d.average + " / 30";
+                document.getElementById("kpiTop").innerText = d.top ? d.top.total : "-";
+
+                // Top List
+                let topHTML = d.top5.map(s =>
+                    `<li>
+                <a href="/student_result/${s.id}">
+                    ${s.student_name} (${s.total})
+                </a>
+            </li>`
+                ).join("");
+
+                document.getElementById("topList").innerHTML = topHTML;
+
+                // Least
+                document.getElementById("leastBox").innerHTML =
+                    d.least ? `<b>${d.least.student_name}</b> (${d.least.total})` : "N/A";
+            });
+
+        // ================= GRAPH =================
+        fetch(`/graphical_report/${id}`)
+            .then(r => r.json())
+            .then(d => {
+
+                if (statusChart) statusChart.destroy();
+
+                statusChart = new Chart(document.getElementById("statusChart"), {
+                    type: "pie",
+                    data: {
+                        labels: ["Checked", "Unchecked"],
+                        datasets: [{
+                            data: [d.checked, d.unchecked],
+                            backgroundColor: ["#2ecc71", "#e74c3c"]
+                        }]
+                    }
+                });
+            });
+
+        // ================= MARKS =================
+        fetch(`/marks_distribution/${id}`)
+            .then(r => r.json())
+            .then(d => {
+
+                if (marksChart) marksChart.destroy();
+                if (passChart) passChart.destroy();
+
+                // Marks Chart
+                marksChart = new Chart(document.getElementById("marksChart"), {
+                    type: "bar",
+                    data: {
+                        labels: ["0-10", "11-15", "16-20", "21-25", "26-30"],
+                        datasets: [{
+                            label: "Students",
+                            data: Object.values(d.ranges)
+                        }]
+                    }
+                });
+
+                // Pass %
+                let total = d.pass + d.fail;
+                let percent = total ? ((d.pass / total) * 100).toFixed(1) : 0;
+
+                document.getElementById("kpiPass").innerText = percent + "%";
+
+                // Pass Chart
+                passChart = new Chart(document.getElementById("passChart"), {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Pass", "Fail"],
+                        datasets: [{
+                            data: [d.pass, d.fail],
+                            backgroundColor: ["#2ecc71", "#e74c3c"]
+                        }]
+                    }
+                });
+
+            });
+
+    }
+
+    // EXPORT
+    function exportPDF() {
+        let id = document.getElementById("assignmentSelect").value;
+        window.location.href = `/export_pdf?assignment_id=${id}`;
+    }
+
+    function exportExcel() {
+        let id = document.getElementById("assignmentSelect").value;
+        window.location.href = `/export_excel?assignment_id=${id}`;
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Users</h2>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Action</th>
+    </tr>
+
+    {% for u in users %}
+
+    <tr>
+        <td>{{u['id']}}</td>
+        <td>{{u['username']}}</td>
+        <td>{{u['role']}}</td>
+
+        <td>
+            {% if u['role'] != 'admin' %}
+            <a href="/delete_user/{{u['id']}}" onclick="return confirm('Are you sure you want to delete this user?')"
+                style="color:red;">
+                Delete
+            </a>
+            {% else %}
+            <span style="color:gray;">Protected</span>
+            {% endif %}
+        </td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

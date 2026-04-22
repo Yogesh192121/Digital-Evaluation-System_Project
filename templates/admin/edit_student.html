@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit Student</h2>
+
+<form method="POST">
+
+    Roll No: <br>
+    <input type="text" value="{{ student[1] }}" disabled><br><br>
+
+    Student Name:<br>
+    <input type="text" name="student_name" value="{{ student[2] }}" required><br><br>
+
+    Department:<br>
+    <input type="text" name="department" value="{{ student[3] }}" required><br><br>
+
+    Year:<br>
+    <select name="year">
+        <option value="1" {% if student[4]=='1' %}selected{% endif %}>1</option>
+        <option value="2" {% if student[4]=='2' %}selected{% endif %}>2</option>
+        <option value="3" {% if student[4]=='3' %}selected{% endif %}>3</option>
+        <option value="4" {% if student[4]=='4' %}selected{% endif %}>4</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Update Student</button>
+
+</form>
+
+{% endblock %}

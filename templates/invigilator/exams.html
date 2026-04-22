@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Ongoing Exams</h2>
+
+<table border="1">
+    <tr>
+        <th>Dept</th>
+        <th>Year</th>
+        <th>Course</th>
+        <th>Exam</th>
+        <th>Action</th>
+    </tr>
+
+    {% for e in exams %}
+    <tr>
+        <td>{{ e.department }}</td>
+        <td>{{ e.year }}</td>
+        <td>{{ e.course_name }}</td>
+        <td>{{ e.exam_name }}</td>
+
+        <td>
+            <a href="/manage_exam/{{ e.id }}">Manage</a>
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

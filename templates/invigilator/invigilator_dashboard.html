@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Uploaded Answer Sheets</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+        <th>Course</th>
+        <th>Exam</th>
+        <th>View</th>
+    </tr>
+
+    {% for a in answers %}
+
+    <tr>
+        <td>{{ a.roll_no }}</td>
+        <td>{{ a.student_name }}</td>
+        <td>{{ a.course_code }}</td>
+        <td>{{ a.exam_name }}</td>
+
+        <td>
+            <a href="/{{ a.file_path }}" target="_blank" class="btn">View</a>
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

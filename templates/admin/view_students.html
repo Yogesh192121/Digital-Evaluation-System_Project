@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Student Management</h2>
+
+<h3>Bulk Upload Students</h3>
+
+<form action="/bulk_upload_students" method="POST" enctype="multipart/form-data">
+
+    <input type="file" name="file" accept=".xlsx" required>
+
+    <button type="submit">Upload Excel</button>
+
+</form>
+
+<br>
+
+<div class="filters">
+
+    <form method="POST">
+
+        <label>Department</label>
+
+        <select name="department" required>
+            <option value="">Select Department</option>
+
+            {% for dept in departments %}
+            <option value="{{ dept[0] }}">{{ dept[0] }}</option>
+            {% endfor %}
+
+        </select>
+
+        <label>Year</label>
+
+        <select name="year" required>
+            <option value="all">All Years</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+
+        <button type="submit">Load Students</button>
+
+    </form>
+
+</div>
+
+<br>
+
+<h3>Total Students: {{ students|length }}</h3>
+
+<input type="text" id="search" placeholder="Search student...">
+
+<br><br>
+
+<table id="studentTable">
+
+    <tr>
+        <th>Roll No</th>
+        <th>Student Name</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for s in students %}
+
+    <tr>
+
+        <td>{{ s[1] }}</td>
+        <td>{{ s[2] }}</td>
+        <td>{{ s[3] }}</td>
+        <td>{{ s[4] }}</td>
+
+        <td>
+            <span style="background:#3498db;color:white;padding:4px 8px;border-radius:4px;">
+                Year {{ s[4] }}
+            </span>
+
+            <a href="/edit_student/{{ s[0] }}" class="edit-btn">Edit</a>
+
+            <a href="/delete_student/{{ s[0] }}" class="delete-btn" onclick="return confirm('Delete this student?')">
+                Delete
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+
+<script>
+
+    document.getElementById("search").addEventListener("keyup", function () {
+
+        var value = this.value.toLowerCase();
+
+        var rows = document.querySelectorAll("#studentTable tr");
+
+        rows.forEach(function (row, index) {
+
+            if (index === 0) return;
+
+            var text = row.innerText.toLowerCase();
+
+            row.style.display = text.includes(value) ? "" : "none";
+
+        });
+
+    });
+
+</script>
+
+{% endblock %}
