@@ -53,7 +53,7 @@ python app.py
 ```
 5. Open in browser
 ```id="z2v9hq"
-http://127.0.0.1:5000/
+[https://digital-evaluation-system-project.onrender.com/]
 ```
 📌 Future Enhancements
 
